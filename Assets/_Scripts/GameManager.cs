@@ -9,13 +9,14 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private float score;
     [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private int highScore;
     [SerializeField] private bool initiateGame;
     [SerializeField] private bool gameStarted;
+    private int[] playerScores = new int[3];
 
     [SerializeField] private TextMeshProUGUI gameoverPanelScoreText;
-    [SerializeField] private TextMeshProUGUI gameoverPanelHighscoreText;
-
+    [SerializeField] private TextMeshProUGUI gameoverPanelScoreText1st;
+    [SerializeField] private TextMeshProUGUI gameoverPanelScoreText2nd;
+    [SerializeField] private TextMeshProUGUI gameoverPanelScoreText3rd;
 
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private GameObject gameoverPanel;
@@ -33,11 +34,7 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
-    }
-
-    public void Start()
-    {
-
+        LoadScore();
     }
 
     public void Update()
@@ -88,26 +85,47 @@ public class GameManager : MonoBehaviour
         gameStarted = false;
         initiateGame = false;
 
-        //Check if score is bigger then highscore
-        if (score > highScore)
-        {
-            highScore = Mathf.RoundToInt(score);
-        }
-
         //Enable gameover panel
         gameoverPanel.SetActive(true);
         gamePanel.SetActive(false);
 
-        //Set scores at gameover panel
-        gameoverPanelScoreText.text = $"Score\n{score.ToString("0")}m";
-        gameoverPanelHighscoreText.text = $"Highscore\n{highScore.ToString("0")}m";
+        UpdateScore(score);
+        gameoverPanelScoreText.text = $"Your score\n{score.ToString("0")}m";
+        gameoverPanelScoreText1st.text = $"1st:\n{playerScores[0].ToString("0")}m";
+        gameoverPanelScoreText2nd.text = $"2nd:\n{playerScores[1].ToString("0")}m";
+        gameoverPanelScoreText3rd.text = $"3rd:\n{playerScores[2].ToString("0")}m";
+        SaveScore();
 
         //Stop object spawning
         SpawnManager.instance.StopSpawning();
 
         Time.timeScale = 0;
     }
-
+    public void UpdateScore(float value)
+    {
+        for (int i = 0; i < playerScores.Length; i++)
+        {
+            if (value > playerScores[i])
+            {
+                playerScores[i] = Mathf.RoundToInt(value);
+                break;
+            }
+        }
+    }
+    public void SaveScore()
+    {
+        for (int i = 0; i < playerScores.Length; i++)
+        {
+            PlayerPrefs.SetInt(i.ToString(), playerScores[i]);
+        }
+    }
+    public void LoadScore()
+    {
+        for (int i = 0; i < playerScores.Length; i++)
+        {
+            playerScores[i] = PlayerPrefs.GetInt(i.ToString());
+        }
+    }
     public void Game()
     {
         if (!initiateGame) return;
@@ -142,12 +160,4 @@ public class GameManager : MonoBehaviour
             Destroy(obj);
         }
     }
-}
-
-public class Class1
-{
-}
-
-internal class GameManager1
-{
 }
